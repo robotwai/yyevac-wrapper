@@ -7,15 +7,6 @@ plugins {
 group = 'com.github.robotwai'
 version = '1.1.62' 
 
-// 创建一个配置来处理 AAR 依赖
-configurations {
-    aar
-}
-
-artifacts {
-    aar file('libs/yyevac-1.1.62.aar')
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
@@ -23,35 +14,18 @@ publishing {
             artifactId = 'yyevac-wrapper'
             version = version
             
-            // 1. 指定要上传的文件
+            // 指定要上传的文件
             artifact("libs/yyevac-1.1.62.aar") {
-                extension 'aar' // 明确扩展名
+                extension 'aar'
             }
             
-            // 2. 关键：强制修改 POM 文件，告诉使用者"我是一个 aar，不是 jar"
-            // 这能有效解决 transform 报错
-            pom.withXml {
-                asNode().appendNode('packaging', 'aar')
-            }
-            
+            // 使用 pom DSL 设置 packaging
             pom {
+                packaging = 'aar'
                 name = 'yyevac-wrapper'
                 description = 'A wrapper for yyevac AAR'
                 url = 'https://github.com/robotwai/yyevac-wrapper'
             }
         }
     }
-    
-    // JitPack 需要的仓库配置
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("${buildDir}/repo")
-        }
-    }
-}
-
-// 添加一个任务用于本地测试发布
-tasks.register('publishToLocalRepo') {
-    dependsOn 'publishMavenPublicationToGitHubPackagesRepository'
 }
