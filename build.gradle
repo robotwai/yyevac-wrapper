@@ -1,44 +1,24 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.2'
-    }
+plugins {
+    id 'base'
+    id 'maven-publish'
 }
 
-// --- 新增部分开始 ---
-// 这一段是必须的，告诉 Gradle 去哪里下载 AAPT2 等编译工具
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-// --- 新增部分结束 ---
+// 这里的配置跟随你的实际情况
+group = 'com.github.robotwai'
+version = '1.1.62' 
 
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
-
-android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 30
-    }
-}
-
-configurations.maybeCreate("default")
-artifacts.add("default", file("libs/yyevac-1.1.62.aar"))
-
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                artifact file("libs/yyevac-1.1.62.aar")
+publishing {
+    publications {
+        maven(MavenPublication) {
+            // 1. 指定要上传的文件
+            artifact("libs/yyevac-1.1.62.aar") {
+                extension 'aar' // 明确扩展名
+            }
+            
+            // 2. 关键：强制修改 POM 文件，告诉使用者“我是一个 aar，不是 jar”
+            // 这能有效解决 transform 报错
+            pom.withXml {
+                asNode().appendNode('packaging', 'aar')
             }
         }
     }
