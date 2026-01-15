@@ -6,18 +6,17 @@ plugins {
 group = 'com.github.robotwai'
 version = '1.1.62'
 
-// 定义 AAR 文件路径
-def aarFile = file("libs/yyevac-1.1.62.aar")
-
 publishing {
     publications {
         release(MavenPublication) {
-            groupId = group
+            groupId = project.group
             artifactId = 'yyevac-wrapper'
-            version = version
+            version = project.version
             
-            // 直接设置 artifact，不带 classifier
-            artifact(aarFile)
+            // 明确指定 artifact 的扩展名为 aar
+            artifact(file("$projectDir/libs/yyevac-1.1.62.aar")) {
+                extension = 'aar'
+            }
             
             pom {
                 packaging = 'aar'
