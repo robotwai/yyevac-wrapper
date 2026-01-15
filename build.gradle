@@ -1,28 +1,40 @@
-plugins {
-    id 'com.android.library' version '7.2.1' // 这里的版本号跟随你主工程即可，不重要
-    id 'maven-publish'
-}
-
-android {
-    compileSdkVersion 33 // 稍微新一点的 SDK 版本
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 33
+buildscript {
+    repositories {
+        google() // 关键：必须显式添加 google 仓库
+        mavenCentral()
+    }
+    dependencies {
+        // 关键：降级使用 4.2.2 版本，它完美兼容 JitPack 默认的 Java 8 和 Gradle 6 环境
+        // 这不会影响你主工程使用新版本，因为这只是个壳
+        classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
 
-// 这一步是关键：把本地 AAR 定义为一个构件
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+android {
+    // 使用较低的编译版本以保证兼容性
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+    }
+}
+
+// 定义构件：把你的 AAR 文件作为一个 artifact
 configurations.maybeCreate("default")
 artifacts.add("default", file("libs/yyevac-1.1.62.aar"))
 
-// 配置发布信息，让 JitPack 能识别
+// 发布配置
 afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                // 这里定义的 group 和 artifactId 决定了你最后引用的名字
-                // JitPack 默认会使用 com.github.你的用户名:仓库名:版本号
-                // 所以这里只需要把文件传上去即可
+                // JitPack 会自动使用 com.github.用户名:仓库名:Tag 作为坐标
+                // 这里我们只需要指定要发布的文件
                 artifact file("libs/yyevac-1.1.62.aar")
             }
         }
