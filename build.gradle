@@ -3,23 +3,22 @@ plugins {
     id 'maven-publish'
 }
 
-// 这里的配置跟随你的实际情况
 group = 'com.github.robotwai'
-version = '1.1.62' 
+version = '1.1.62'
+
+// 定义 AAR 文件路径
+def aarFile = file("libs/yyevac-1.1.62.aar")
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        release(MavenPublication) {
             groupId = group
             artifactId = 'yyevac-wrapper'
             version = version
             
-            // 指定要上传的文件
-            artifact("libs/yyevac-1.1.62.aar") {
-                extension 'aar'
-            }
+            // 直接设置 artifact，不带 classifier
+            artifact(aarFile)
             
-            // 使用 pom DSL 设置 packaging
             pom {
                 packaging = 'aar'
                 name = 'yyevac-wrapper'
@@ -28,4 +27,9 @@ publishing {
             }
         }
     }
+}
+
+// 确保 JitPack 能正确识别发布任务
+tasks.register('install') {
+    dependsOn 'publishToMavenLocal'
 }
