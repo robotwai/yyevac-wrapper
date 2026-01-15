@@ -1,20 +1,27 @@
 buildscript {
     repositories {
-        google() // 关键：必须显式添加 google 仓库
+        google()
         mavenCentral()
     }
     dependencies {
-        // 关键：降级使用 4.2.2 版本，它完美兼容 JitPack 默认的 Java 8 和 Gradle 6 环境
-        // 这不会影响你主工程使用新版本，因为这只是个壳
         classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
+
+// --- 新增部分开始 ---
+// 这一段是必须的，告诉 Gradle 去哪里下载 AAPT2 等编译工具
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+// --- 新增部分结束 ---
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 android {
-    // 使用较低的编译版本以保证兼容性
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -24,17 +31,13 @@ android {
     }
 }
 
-// 定义构件：把你的 AAR 文件作为一个 artifact
 configurations.maybeCreate("default")
 artifacts.add("default", file("libs/yyevac-1.1.62.aar"))
 
-// 发布配置
 afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                // JitPack 会自动使用 com.github.用户名:仓库名:Tag 作为坐标
-                // 这里我们只需要指定要发布的文件
                 artifact file("libs/yyevac-1.1.62.aar")
             }
         }
